@@ -1,0 +1,15 @@
+# Folders
+commands
+database
+db
+src
+node_modules
+
+# Files
+.eslintrc.json
+index.js
+pnpm-lock.yaml
+babel.cjs.json
+babel.esm.json
+packers.js
+.gitignore

@@ -1,2 +1,2 @@
-import { Loader } from "./classes/Loader.js";
+import { Loader } from "./classes/loader.js";
 export { Loader };
