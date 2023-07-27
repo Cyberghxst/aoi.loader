@@ -1,0 +1,10 @@
+# Folders
+commands
+database
+db
+lib
+node_modules
+
+# Files
+index.js
+pnpm-lock.yaml

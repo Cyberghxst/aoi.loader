@@ -1,0 +1,35 @@
+{
+  "name": "aoi.loader",
+  "version": "1.0.0",
+  "description": "an Unofficial command loader for aoi.js",
+  "main": "./lib/cjs/main.js",
+  "module": "./lib/esm/main.js",
+  "exports": {
+    "import": "./lib/esm/main.js",
+    "require": "./lib/cjs/main.js"
+  },
+  "types": "typings.d.ts",
+  "scripts": {
+    "compile": "babel src --out-dir lib/cjs --config-file ./babel.cjs.json && babel src --out-dir lib/esm --config-file ./babel.esm.json",
+    "test": "node index.js"
+  },
+  "keywords": [
+    "handler",
+    "command loader",
+    "aoi.js",
+    "aoijs"
+  ],
+  "author": "Cyberghxst",
+  "license": "ISC",
+  "dependencies": {
+    "aoi.js": "^6.4.0",
+    "ascii-table": "^0.0.9"
+  },
+  "devDependencies": {
+    "@akarui/aoi.db": "^1.0.0",
+    "@babel/cli": "^7.22.9",
+    "@babel/core": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
+    "eslint": "^8.45.0"
+  }
+}
