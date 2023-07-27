@@ -1,7 +1,7 @@
 {
   "name": "aoi.loader",
   "version": "1.0.0",
-  "description": "an Unofficial command loader for aoi.js",
+  "description": "an Unofficial command loader for aoi.js gen 6",
   "main": "./lib/cjs/main.js",
   "module": "./lib/esm/main.js",
   "exports": {
@@ -10,7 +10,7 @@
   },
   "types": "typings.d.ts",
   "scripts": {
-    "compile": "babel src --out-dir lib/cjs --config-file ./babel.cjs.json && babel src --out-dir lib/esm --config-file ./babel.esm.json",
+    "compile": "babel src --out-dir lib/cjs --config-file ./babel.cjs.json && babel src --out-dir lib/esm --config-file ./babel.esm.json && node packers.js",
     "test": "node index.js"
   },
   "keywords": [
@@ -30,6 +30,8 @@
     "@babel/cli": "^7.22.9",
     "@babel/core": "^7.22.9",
     "@babel/preset-env": "^7.22.9",
-    "eslint": "^8.45.0"
+    "eslint": "^8.45.0",
+    "lodash": "^4.17.21",
+    "uglify-js": "^3.17.4"
   }
 }
