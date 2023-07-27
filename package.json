@@ -1,6 +1,6 @@
 {
   "name": "aoi.loader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "an Unofficial command loader for aoi.js gen 6",
   "main": "./lib/cjs/main.js",
   "module": "./lib/esm/main.js",
@@ -33,5 +33,9 @@
     "eslint": "^8.45.0",
     "lodash": "^4.17.21",
     "uglify-js": "^3.17.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
   }
 }
