@@ -9,100 +9,39 @@ export class Reader {
      */
     static parse(input) {
         // command data
-        let exportType = "", name = "", aliases = [], code = "", prototype = "", channel = "";
-
+        let exportType = "", name = "", aliases = [], prototype = "", channel = "";
         // Reader data
-        let where = "export", sawdots = false, writing = "", codedepth = 0;
-
-        // Reading         /* [...input] */
-        for (let i = 0; i <= input.length; i++) {
-            const char = input.at(i);
-            if (where === "export") {
-                if (!input.includes("[exportCommand:"))
-                    throw new LoaderError("missing_export", "Command export is required!");
-                if (char !== ":" && sawdots === false) continue;
-                else if (char === ":" && sawdots === false) { sawdots = true; continue; }
-                else if (char === "]" && sawdots === true) {
-                    exportType = exportType.trim();
-                    where = "prototype";
-                    sawdots = false;
+        let writing = "";
+        // Reading
+        exportType = input.match(/\[exportCommand:.*?\]/)?.[0].split(":")[1].trim().slice(0, - 1);
+        if (!exportType) throw new LoaderError("missing_export", "You must export aoi files.");
+        name = input.match(/name: \w+/g)?.[0].split(":")[1].trim() ?? "aoi.loader:" + randomUUID();
+        prototype = input.match(/prototype: \w+/g)?.[0].split(":")[1].trim() ?? undefined;
+        channel = input.match(/channel: \w+/g)?.[0].split(":")[1].trim() ?? undefined;
+        writing = input.match(/aliases: .+/g)?.[0];
+        if (writing) {
+            let temp = "";
+            writing = writing.split(":")[1].trim();
+            for (const char of writing.split("")) {
+                if (char === ",") {
+                    aliases.push(temp.trim());
+                    temp = "";
                     continue;
                 }
-                if (sawdots) exportType += char;
+                temp += char;
             }
-            if (where === "prototype") {
-                if (!input.includes("prototype:")) where = "name";
-                if (char !== ":" && sawdots === false) continue;
-                else if (char === ":" && sawdots === false) { sawdots = true; continue; }
-                else if (char === "\n" && sawdots === true) {
-                    prototype = prototype.trim();
-                    where = "name";
-                    sawdots = false;
-                    continue;
-                }
-                if (sawdots) prototype += char;
-            }
-            if (where === "name") {
-                if (!input.includes("name:")) name = "era.loader:" + randomUUID(), where = "channel";
-                if (char !== ":" && sawdots === false) continue;
-                else if (char === ":" && sawdots === false) { sawdots = true; continue; }
-                else if (char === "\n" && sawdots === true) {
-                    name = name.trim();
-                    where = "channel";
-                    sawdots = false;
-                    continue;
-                }
-                if (sawdots) name += char;
-            }
-            if (where === "channel") {
-                if (!input.includes("channel:")) where = "aliases";
-                if (char !== ":" && sawdots === false) continue;
-                else if (char === ":" && sawdots === false) { sawdots = true; continue; }
-                else if (char === "\n" && sawdots === true) {
-                    channel = channel.trim();
-                    where = "aliases";
-                    sawdots = false;
-                    continue;
-                }
-                if (sawdots) channel += char;
-            }
-            if (where === "aliases") {
-                if (!input.includes("aliases:")) { where = "code"; continue; }
-                if (char !== ":" && sawdots === false) continue;
-                else if (char === ":" && sawdots === false) { sawdots = true; continue; }
-                else if (char === "," && sawdots === true) {
-                    aliases.push(writing.trim());
-                    writing = "";
-                    continue;
-                } else if (char === "\n" && sawdots === true) {
-                    aliases.push(writing.trim());
-                    writing = "";
-                    sawdots = false;
-                    where = "code";
-                    continue;
-                }
-                if (sawdots) writing += char;
-            }
-            if (where === "code") {
-                if (!input.includes("code:"))
-                    throw new LoaderError("missing_code", "Command code is required!");
-                if (!input.includes("@{"))
-                    throw new LoaderError("missing_code", "Code container is required!");
-                if (char === "{") codedepth++;
-                else if (char === "}") codedepth--;
-                if (codedepth > 0) code += char;
-            }
+            if (temp !== "") aliases.push(temp.trim());
         }
-        if (codedepth > 0)
-            throw new LoaderError("code_not_balanced", "Curly brackets in code must be balanced!");
+        if (!input.includes("code: ") || (input.includes("code: ") && !input.includes("@{")))
+            throw new LoaderError("missing_code", "Code is required!");
         return {
             name,
             type: exportType,
-            aliases: aliases.length > 0 ? aliases : undefined,
-            code: code.slice(1).trim(),
-            channel: channel.length > 0 ? channel.trim() : undefined,
-            prototype: prototype.length > 0 ? prototype.trim() : undefined,
-            $if: input.includes("useIf: old") ? "old" : undefined
+            aliases,
+            code: input.split("@{").slice(1).join("").split("}").slice(0, -1).join(""),
+            channel,
+            prototype,
+            $if: input.match(/useIf: old/g)?.[0] ? "old" : undefined
         };
     }
 }

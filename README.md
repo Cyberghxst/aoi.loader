@@ -48,6 +48,7 @@ new Loader(bot).load("./commands")
     name: COMMAND_NAME
     channel: CHANNEL_ID
     aliases: ALIAS1, ALIAS2, ALIAS3
+    useIf: old
     code: @{
         $log[normal aoi.js code inside curly brackets.]
     }
@@ -83,15 +84,12 @@ new Loader(bot).load("./commands")
 [exportCommand: interaction] {
     prototype: slash,
     name: ping
+    useIf: old
     code: @{
         $interactionReply[Pong! $ping ms]
     }
-    useIf: old
 }
 ```
-^ `useIf: old` must be above code.
-
-## WARNING: All command options must be filled STRICTLY in the same order as is shown here. Reference [here](#all-options)
 
 ## Updating commands
 You must use the built-in function.
@@ -116,9 +114,6 @@ $updateLoader
     }
 }
 ```
-
-## Known situations
-As I mentioned before, command options in ".aoi" files must follow the same order shown here. If you don't follow that, command options will filled wrong and will not work.
 
 ### WARNING
 - As you know, aoi v6 is not the same as aoi v7, this loader doesn't provide advanced features for ".aoi" files like embedded JS.

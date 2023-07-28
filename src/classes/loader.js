@@ -5,8 +5,6 @@ import AsciiTable from "ascii-table";
 import { LoaderError } from "./error.js";
 import { lstatSync, readdirSync, readFileSync } from "fs";
 
-const { parse } = Reader;
-
 /**
  * Check if the file is valid.
  * @param {string} file 
@@ -46,6 +44,7 @@ export class Loader {
             let isFile = lstatSync(join(root, dir, file)).isFile();
             if (isFile && isValidFile(file)) {
                 let command = await this.#import(root, dir, file);
+                console.log(command);
                 if (!command) continue;
                 Array.isArray(command) ? command.forEach(cmd => commands.push(cmd)) : commands.push(command);
             } else await this.load(join(dir, file));
@@ -63,16 +62,15 @@ export class Loader {
     async #import(root, dir, file) {
         let command;
         try {
-            if (file.endsWith(".aoi")) command = parse(readFileSync(join(root, dir, file), { encoding: "utf-8" }));
-            else {
+            if (file.endsWith(".aoi")) command = Reader.parse(readFileSync(join(root, dir, file), { encoding: "utf-8" }));
+            else if (file.endsWith(".js")) {
                 command = require(join(root, dir, file));
                 delete require.cache[join(root, dir, file)];
             }
         } catch {
-            if (file.endsWith(".aoi")) command = process.platform === "win32" ? parse(readFileSync(join("file:///", root, dir, file), { encoding: "utf-8" })) : parse(readFileSync(join(root, dir, file), { encoding: "utf-8" }));
-            else command = process.platform === "win32" ? (await import(join("file:///", root, dir, file))) : (await import(join(root, dir, file)));
+            if (file.endsWith(".aoi")) command = Reader.parse(readFileSync(join(root, dir, file), { encoding: "utf-8" }));
+            else if (file.endsWith(".js")) command = process.platform === "win32" ? (await import(join("file:///", root, dir, file))) : (await import(join(root, dir, file)));
         }
-        if (command) command.path = dir + "/" + file;
         return command;
     }
 
@@ -86,11 +84,11 @@ export class Loader {
         for (let i = 0; i < commands.length; i++) {
             const command = commands.at(i);
             if (!("type" in command)) command.type = "default";
-            if (!this.client.cmd.types.includes(command.type)) { table.addRow(i, command.name, "Unknown Type", "Failed to load!", "Invalid command type."); continue; }
+            if (!this.client.cmd.types.includes(command.type)) { table.addRow(i, command.name, command.type, "Failed to load!", "Invalid command type."); continue; }
             try {
                 this.client.cmd.createCommand(command);
                 table.addRow(i, command.name, command.type, "Loaded", "None");
-            } catch(e) { table.addRow(i, command.name, command.type, "Failed to load", e.message); }
+            } catch(e) { table.addRow(i, command.name, command.type, "Failed to load", `${e.message}`); }
         }
         console.log(table.toString());
     }
@@ -103,7 +101,7 @@ export class Loader {
     }
 
     /**
-     * Add the command updater to the client.
+     * @private Add the command updater to the client.
      */
     #addPlugin() {
         this.client.functionManager.createFunction({
