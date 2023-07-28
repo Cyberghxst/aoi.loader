@@ -44,7 +44,6 @@ export class Loader {
             let isFile = lstatSync(join(root, dir, file)).isFile();
             if (isFile && isValidFile(file)) {
                 let command = await this.#import(root, dir, file);
-                console.log(command);
                 if (!command) continue;
                 Array.isArray(command) ? command.forEach(cmd => commands.push(cmd)) : commands.push(command);
             } else await this.load(join(dir, file));
