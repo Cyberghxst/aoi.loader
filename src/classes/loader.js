@@ -18,7 +18,7 @@ export class Loader {
      * @param {boolean} [addToClient=true] Adds the loader into the client.
      */
     constructor(client, addToClient = true) {
-        if (!(client instanceof AoiClient))
+        if (!client || (client && !(client instanceof AoiClient)))
             throw new LoaderError("invalid_aoi_client", "Client must an instance of AoiClient!");
         if (typeof addToClient !== "boolean")
             throw new LoaderError("invalid_option", "Invalid boolean in constructor options!");
@@ -36,8 +36,7 @@ export class Loader {
     async load(dir) {
         if (!dir || typeof dir !== "string") throw new LoaderError("missing_path", "You must provide a valid commands path in: Loader#load!");
         if (!this.path) this.path = dir;
-        this.client.cmd = undefined;
-        this.client.cmd = this.old;
+        this.#resetCommands();
         const root = process.cwd(), files = readdirSync(join(root, dir));
         const commands = [];
         for (const file of files) {
@@ -49,6 +48,30 @@ export class Loader {
             } else await this.load(join(dir, file));
         }
         this.#set(commands);
+    }
+
+    /**
+     * Reload the commands.
+     */
+    async reload() {
+        await this.load(this.path);
+    }
+
+    /**
+     * @private Add the command updater to the client.
+     */
+    #addPlugin() {
+        this.client.functionManager.createFunction({
+            name: "$updateLoader",
+            code: async function (d) {
+                const data = d.util.aoiFunc(d);
+                if (!d.client.Loader) return d.aoiError.fnError(d, "custom", {}, "Loader class is not initialized!");
+                await d.client.Loader.reload();
+                return {
+                    code: d.util.setCode(data)
+                };
+            }
+        });
     }
 
     /**
@@ -93,26 +116,10 @@ export class Loader {
     }
 
     /**
-     * Reload the commands.
+     * @private Clear all client commands from cache.
      */
-    async reload() {
-        await this.load(this.path);
-    }
-
-    /**
-     * @private Add the command updater to the client.
-     */
-    #addPlugin() {
-        this.client.functionManager.createFunction({
-            name: "$updateLoader",
-            code: async function (d) {
-                const data = d.util.aoiFunc(d);
-                if (!d.client.Loader) return d.aoiError.fnError(d, "custom", {}, "Loader class is not initialized!");
-                await d.client.Loader.reload();
-                return {
-                    code: d.util.setCode(data)
-                };
-            }
-        });
+    #resetCommands() {
+        this.client.cmd = undefined;
+        this.client.cmd = this.old;
     }
 }

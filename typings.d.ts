@@ -46,6 +46,10 @@ export declare class Loader {
      * @param commands Array of collected commands.
      */
     #set(commands: Command[]): void;
+    /**
+     * @private Clear all client commands from cache.
+     */
+    #resetCommands(): void
 }
 
 declare class Reader {
