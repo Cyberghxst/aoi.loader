@@ -119,3 +119,4 @@ $updateLoader
 - As you know, aoi v6 is not the same as aoi v7, this loader doesn't provide advanced features for ".aoi" files like embedded JS.
 - If you want to use the VSC extension, we recommend do not follow autocompletion since types and functions are a bit different between both versions.
 - Using this loader will make $updateCommands not work.
+- [18/August/2023]: This package still works but won't receive any updates.

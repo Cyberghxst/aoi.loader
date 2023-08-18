@@ -26,7 +26,7 @@ export class Loader {
         this.path = null;
         this.old = Object.freeze(this.client.cmd);
         this.#addPlugin();
-        if (addToClient) this.client.Loader = this;
+        if (addToClient) this.client.loader = this;
     }
 
     /**
@@ -34,7 +34,7 @@ export class Loader {
      * @param {string} dir Commands path.
      */
     async load(dir) {
-        if (!dir || typeof dir !== "string") throw new LoaderError("missing_path", "You must provide a valid commands path in: Loader#load!");
+        if (!dir || (dir && typeof dir !== "string")) throw new LoaderError("missing_path", "You must provide a valid commands path in: Loader#load!");
         if (!this.path) this.path = dir;
         this.#resetCommands();
         const root = process.cwd(), files = readdirSync(join(root, dir));
@@ -65,8 +65,8 @@ export class Loader {
             name: "$updateLoader",
             code: async function (d) {
                 const data = d.util.aoiFunc(d);
-                if (!d.client.Loader) return d.aoiError.fnError(d, "custom", {}, "Loader class is not initialized!");
-                await d.client.Loader.reload();
+                if (!d.client.loader) return d.aoiError.fnError(d, "custom", {}, "Loader class is not initialized!");
+                await d.client.loader.reload();
                 return {
                     code: d.util.setCode(data)
                 };
@@ -90,8 +90,12 @@ export class Loader {
                 delete require.cache[join(root, dir, file)];
             }
         } catch {
-            if (file.endsWith(".aoi")) command = Reader.parse(readFileSync(join(root, dir, file), { encoding: "utf-8" }));
-            else if (file.endsWith(".js")) command = process.platform === "win32" ? (await import(join("file:///", root, dir, file))) : (await import(join(root, dir, file)));
+            if (file.endsWith(".aoi")) 
+                command = Reader.parse(readFileSync(join(root, dir, file), { encoding: "utf-8" }));
+            else if (file.endsWith(".js"))
+                command = process.platform === "win32" 
+                    ? (await import(join("file:///", root, dir, file))) 
+                    : (await import(join(root, dir, file)));
         }
         return command;
     }

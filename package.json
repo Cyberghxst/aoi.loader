@@ -23,7 +23,8 @@
   "license": "ISC",
   "dependencies": {
     "aoi.js": "^6.4.0",
-    "ascii-table": "^0.0.9"
+    "ascii-table": "^0.0.9",
+    "tty-table": "^4.2.1"
   },
   "devDependencies": {
     "@akarui/aoi.db": "^1.0.0",
