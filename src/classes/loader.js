@@ -1,5 +1,5 @@
 import { join } from "path";
-import { AoiClient } from "aoi.js";
+import { AoiClient, LoadCommands } from "aoi.js";
 import { Reader } from "./reader.js";
 import AsciiTable from "ascii-table";
 import { LoaderError } from "./error.js";
@@ -12,12 +12,30 @@ import { lstatSync, readdirSync, readFileSync } from "fs";
  */
 const isValidFile = (file) => file.endsWith(".js") || file.endsWith(".aoi");
 
+/**
+ * @typedef LoaderExtraOptions
+ * @property {?boolean} [removeUseless=true] Removes useless functions from the aoi core.
+ * @property {?boolean} [removeNativeLoader=true] Removes LoadCommands class if found.
+ */
+
+/** @type {LoaderExtraOptions} */
+const defaultExtraOptions = {
+    removeUseless: true,
+    removeNativeLoader: true
+}
+
 export class Loader {
     /**
      * @param {AoiClient} client aoi.js client definition.
      * @param {boolean} [addToClient=true] Adds the loader into the client.
+     * @param {LoaderExtraOptions} [extraOptions=defaultExtraOptions] Extra options for the loader.
+     * @example
+     * new Loader(bot, true, {
+     *     removeUseless: true,
+     *     removeNativeLoader: false
+     * })
      */
-    constructor(client, addToClient = true) {
+    constructor(client, addToClient = true, extraOptions = defaultExtraOptions) {
         if (!client || (client && !(client instanceof AoiClient)))
             throw new LoaderError("invalid_aoi_client", "Client must an instance of AoiClient!");
         if (typeof addToClient !== "boolean")
@@ -26,6 +44,18 @@ export class Loader {
         this.path = null;
         this.old = Object.freeze(this.client.cmd);
         this.#addPlugin();
+        if (extraOptions.removeNativeLoader && this.client.loader instanceof LoadCommands) {
+            this.client.loader = null
+        }
+        if (extraOptions.removeUseless) {
+            const useless = ['$lerefAvatar']
+            let functions = this.client.functionManager.functions.sort((a, b) => a.length - b.length)
+            console.log(functions.length)
+            for (const us of useless) {
+                functions = functions.filter(element => element !== us)
+            }
+            this.client.functionManager.functions = functions
+        }
         if (addToClient) this.client.loader = this;
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "aoi.loader",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "an unofficial command loader for aoi.js gen 6",
   "main": "./lib/cjs/main.js",
   "module": "./lib/esm/main.js",
